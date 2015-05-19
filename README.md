@@ -1,1 +1,1 @@
-# Stricture.io-PointCloudViewer
+# Structure.io-PointCloudViewer
