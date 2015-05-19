@@ -34,6 +34,7 @@
                     <connections>
                         <outlet property="cameraImageView" destination="keX-k2-UtC" id="q8N-0n-GCA"/>
                         <outlet property="depthImageView" destination="UJD-Eo-WR5" id="cWQ-DM-Z4G"/>
+                        <outlet property="pointCloudView" destination="exs-Wb-nbs" id="biI-8B-L3u"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

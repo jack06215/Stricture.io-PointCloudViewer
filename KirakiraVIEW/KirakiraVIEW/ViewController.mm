@@ -50,7 +50,7 @@ struct AppStatus
     bool statusMessageDisabled = false;
 };
 
-@interface ViewController () <AVCaptureVideoDataOutputSampleBufferDelegate>
+@interface ViewController () <AVCaptureVideoDataOutputSampleBufferDelegate, UIGestureRecognizerDelegate>
 {
     
     STSensorController *_sensorController;
@@ -108,13 +108,13 @@ struct AppStatus
     self.context = _renderer.context;
     
     
-    /*
-    GLKView *view = (GLKView *)self.view;
-    view.context = self.context;
-    view.drawableDepthFormat = _renderer.drawableDepthFormat;
-    */
-    _animation = new AnimationControl(self.view.frame.size.width,
-                                      self.view.frame.size.height);
+    
+    // = (GLKView *)self.view;
+    self.pointCloudView.context = self.context;
+    self.pointCloudView.drawableDepthFormat = _renderer.drawableDepthFormat;
+    
+    _animation = new AnimationControl(self.pointCloudView.frame.size.width,
+                                      self.pointCloudView.frame.size.height);
 
     
     
@@ -124,6 +124,7 @@ struct AppStatus
     _linearizeBuffer = NULL;
     _coloredDepthBuffer = NULL;
     
+    [self setupGestureRecognizer];
     [self setupColorCamera];
     
     // Sample usage of wireless debugging API
@@ -337,6 +338,45 @@ struct AppStatus
 }
 
 
+- (void) setupGestureRecognizer
+{
+    UIPinchGestureRecognizer *pinchScaleGesture = [[UIPinchGestureRecognizer alloc]
+                                                   initWithTarget:self
+                                                   action:@selector(pinchScaleGesture:)];
+    [pinchScaleGesture setDelegate:self];
+    [self.pointCloudView addGestureRecognizer:pinchScaleGesture];
+    
+    UIPanGestureRecognizer *panRotGesture = [[UIPanGestureRecognizer alloc]
+                                             initWithTarget:self
+                                             action:@selector(panRotGesture:)];
+    [panRotGesture setDelegate:self];
+    [panRotGesture setMaximumNumberOfTouches:1];
+    [self.pointCloudView addGestureRecognizer:panRotGesture];
+    
+    UIPanGestureRecognizer *panTransGesture = [[UIPanGestureRecognizer alloc]
+                                               initWithTarget:self
+                                               action:@selector(panTransGesture:)];
+    [panTransGesture setDelegate:self];
+    [panTransGesture setMaximumNumberOfTouches:2];
+    [panTransGesture setMinimumNumberOfTouches:2];
+    [self.pointCloudView addGestureRecognizer:panTransGesture];
+}
+
+#pragma mark - GLKView and GLKViewController delegate methods
+
+- (void)update
+{
+    [_renderer updateWithBounds:self.pointCloudView.bounds
+                     projection:_animation->currentProjRt()
+                      modelView:_animation->currentModelView()
+                       invScale:1.0f / _animation->currentScale()];
+}
+
+- (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
+{
+    [_renderer glkView:view drawInRect:rect];
+}
+
 #pragma mark -
 #pragma mark Structure SDK Delegate Methods
 
@@ -383,6 +423,7 @@ struct AppStatus
 - (void)sensorDidOutputDepthFrame:(STDepthFrame *)depthFrame
 {
     [self renderDepthFrame:depthFrame];
+    //[_renderer updatePointsWithDepth:_floatDepthFrame image:nil];
 }
 
 // This synchronized API will only be called when two frames match. Typically, timestamps are within 1ms of each other.
@@ -394,6 +435,7 @@ struct AppStatus
 {
     [self renderDepthFrame:depthFrame];
     [self renderColorFrame:sampleBuffer];
+    //[_renderer updatePointsWithDepth:_floatDepthFrame image:_cameraImageView.image.CGImage];
 }
 
 
@@ -765,6 +807,54 @@ const uint16_t maxShiftValue = 2048;
     [_sensorController frameSyncNewColorBuffer:sampleBuffer];
 }
 
+#pragma mark - UI Control
+
+- (void) pinchScaleGesture: (UIPinchGestureRecognizer*) gestureRecognizer
+{
+    if ([gestureRecognizer state] == UIGestureRecognizerStateBegan)
+        _animation->onTouchScaleBegan([gestureRecognizer scale]);
+    else if ( [gestureRecognizer state] == UIGestureRecognizerStateChanged)
+        _animation->onTouchScaleChanged([gestureRecognizer scale]);
+}
+
+- (void) panRotGesture: (UIPanGestureRecognizer*) gestureRecognizer
+{
+    CGPoint touchPos = [gestureRecognizer locationInView:self.view];
+    CGPoint touchVel = [gestureRecognizer velocityInView:self.view];
+    GLKVector2 touchPosVec = GLKVector2Make(touchPos.x, touchPos.y);
+    GLKVector2 touchVelVec = GLKVector2Make(touchVel.x, touchVel.y);
+    
+    if([gestureRecognizer state] == UIGestureRecognizerStateBegan)
+        _animation->onTouchRotBegan(touchPosVec);
+    else if([gestureRecognizer state] == UIGestureRecognizerStateChanged)
+        _animation->onTouchRotChanged(touchPosVec);
+    else if([gestureRecognizer state] == UIGestureRecognizerStateEnded)
+        _animation->onTouchRotEnded (touchVelVec);
+}
+
+- (void) panTransGesture: (UIPanGestureRecognizer*) gestureRecognizer
+{
+    if ([gestureRecognizer numberOfTouches] != 2)
+        return;
+    
+    CGPoint touchPos = [gestureRecognizer locationInView:self.view];
+    CGPoint touchVel = [gestureRecognizer velocityInView:self.view];
+    GLKVector2 touchPosVec = GLKVector2Make(touchPos.x, touchPos.y);
+    GLKVector2 touchVelVec = GLKVector2Make(touchVel.x, touchVel.y);
+    
+    if([gestureRecognizer state] == UIGestureRecognizerStateBegan)
+        _animation->onTouchTransBegan(touchPosVec);
+    else if([gestureRecognizer state] == UIGestureRecognizerStateChanged)
+        _animation->onTouchTransChanged(touchPosVec);
+    else if([gestureRecognizer state] == UIGestureRecognizerStateEnded)
+        _animation->onTouchTransEnded (touchVelVec);
+}
+
+- (void) touchesBegan: (NSSet*)   touches
+            withEvent: (UIEvent*) event
+{
+    _animation->onTouchStop();
+}
 
 @end
 
