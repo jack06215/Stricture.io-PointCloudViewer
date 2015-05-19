@@ -48,9 +48,11 @@ struct AppStatus
     AVCaptureSession *_avCaptureSession;
     AVCaptureDevice *_videoDevice;
     
-    UIImageView *_depthImageView;
+    /*
+     UIImageView *_depthImageView;
     UIImageView *_normalsImageView;
     UIImageView *_colorImageView;
+     */
     
     uint16_t *_linearizeBuffer;
     uint8_t *_coloredDepthBuffer;
@@ -570,7 +572,7 @@ const uint16_t maxShiftValue = 2048;
                                         false,
                                         kCGRenderingIntentDefault);
     
-    _normalsImageView.image = [[UIImage alloc] initWithCGImage:imageRef];
+    //_normalsImageView.image = [[UIImage alloc] initWithCGImage:imageRef];
     
     CGImageRelease(imageRef);
     CGDataProviderRelease(provider);

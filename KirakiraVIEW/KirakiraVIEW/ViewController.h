@@ -15,6 +15,7 @@
 
 @property (weak, nonatomic) IBOutlet UIImageView *cameraImageView;
 
+@property (weak, nonatomic) IBOutlet UIImageView *depthImageView;
 
 @end
 
