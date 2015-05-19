@@ -17,6 +17,11 @@
 #import <Structure/StructureSLAM.h>
 #include <algorithm>
 
+#define RENDERER_CLASS PointCloudRenderer
+#define DATA_COLS 640
+#define DATA_ROWS 480
+
+
 struct AppStatus
 {
     NSString* const pleaseConnectSensorMessage = @"Please connect Structure Sensor.";
@@ -30,8 +35,10 @@ struct AppStatus
         SensorStatusNeedsUserToCharge,
     };
     
+
     // Structure Sensor status.
     SensorStatus sensorStatus = SensorStatusOk;
+
     
     // Whether iOS camera access was granted by the user.
     bool colorCameraIsAuthorized = true;
@@ -61,7 +68,17 @@ struct AppStatus
     
     AppStatus _appStatus;
     
+    
+    // Animation Control
+    AnimationControl *_animation;
+    
+    // Point Cloud Rendering Class
+    RENDERER_CLASS *_renderer;
+    
+    
 }
+
+@property (strong, nonatomic) EAGLContext *context;
 
 - (BOOL)connectAndStartStreaming;
 - (void)renderDepthFrame:(STDepthFrame*)depthFrame;
@@ -78,6 +95,28 @@ struct AppStatus
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    
+    // GL setup
+    _renderer = [[RENDERER_CLASS alloc] initWithCols:DATA_COLS rows:DATA_ROWS];
+    if (!_renderer) {
+        NSLog(@"Failed to create renderer.");
+        return;
+    }
+    
+    
+    self.context = _renderer.context;
+    
+    
+    /*
+    GLKView *view = (GLKView *)self.view;
+    view.context = self.context;
+    view.drawableDepthFormat = _renderer.drawableDepthFormat;
+    */
+    _animation = new AnimationControl(self.view.frame.size.width,
+                                      self.view.frame.size.height);
+
+    
     
     _sensorController = [STSensorController sharedController];
     _sensorController.delegate = self;
