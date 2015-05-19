@@ -86,7 +86,7 @@ struct AppStatus
     _sensorController.delegate = self;
     
     // Create three image views where we will render our frames
-    
+    /*
     CGRect depthFrame = self.view.frame;
     depthFrame.size.height /= 2;
     depthFrame.origin.y = self.view.frame.size.height/2;
@@ -101,10 +101,14 @@ struct AppStatus
     
     CGRect colorFrame = self.view.frame;
     colorFrame.size.height /= 2;
+    */
+    
     
     _linearizeBuffer = NULL;
     _coloredDepthBuffer = NULL;
     _normalsBuffer = NULL;
+    
+    /*
     
     _depthImageView = [[UIImageView alloc] initWithFrame:depthFrame];
     _depthImageView.contentMode = UIViewContentModeScaleAspectFit;
@@ -117,7 +121,7 @@ struct AppStatus
     _colorImageView = [[UIImageView alloc] initWithFrame:colorFrame];
     _colorImageView.contentMode = UIViewContentModeScaleAspectFit;
     [self.view addSubview:_colorImageView];
-    
+    */
     [self setupColorCamera];
     
     // Sample usage of wireless debugging API
@@ -608,7 +612,7 @@ const uint16_t maxShiftValue = 2048;
                                         false,
                                         kCGRenderingIntentDefault);
     
-    _colorImageView.image = [[UIImage alloc] initWithCGImage:imageRef];
+    self.cameraImageView.image = [[UIImage alloc] initWithCGImage:imageRef];
     
     CGImageRelease(imageRef);
     CGDataProviderRelease(provider);
