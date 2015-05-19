@@ -10,6 +10,9 @@
 
 
 #import "ViewController.h"
+#import "AnimationControl.h"
+#import "PointCloudRender.h"
+
 #import <AVFoundation/AVFoundation.h>
 #import <Structure/StructureSLAM.h>
 #include <algorithm>
@@ -48,15 +51,8 @@ struct AppStatus
     AVCaptureSession *_avCaptureSession;
     AVCaptureDevice *_videoDevice;
     
-    /*
-     UIImageView *_depthImageView;
-    UIImageView *_normalsImageView;
-    UIImageView *_colorImageView;
-     */
-    
     uint16_t *_linearizeBuffer;
     uint8_t *_coloredDepthBuffer;
-    uint8_t *_normalsBuffer;
     
     STFloatDepthFrame *_floatDepthFrame;
     STNormalEstimator *_normalsEstimator;
@@ -69,7 +65,6 @@ struct AppStatus
 
 - (BOOL)connectAndStartStreaming;
 - (void)renderDepthFrame:(STDepthFrame*)depthFrame;
-- (void)renderNormalsFrame:(STDepthFrame*)normalsFrame;
 - (void)renderColorFrame:(CMSampleBufferRef)sampleBuffer;
 - (void)setupColorCamera;
 - (void)startColorCamera;
@@ -87,43 +82,9 @@ struct AppStatus
     _sensorController = [STSensorController sharedController];
     _sensorController.delegate = self;
     
-    // Create three image views where we will render our frames
-    /*
-    CGRect depthFrame = self.view.frame;
-    depthFrame.size.height /= 2;
-    depthFrame.origin.y = self.view.frame.size.height/2;
-    depthFrame.origin.x = 1;
-    depthFrame.origin.x = -self.view.frame.size.width * 0.25;
-    
-    CGRect normalsFrame = self.view.frame;
-    normalsFrame.size.height /= 2;
-    normalsFrame.origin.y = self.view.frame.size.height/2;
-    normalsFrame.origin.x = 1;
-    normalsFrame.origin.x = self.view.frame.size.width * 0.25;
-    
-    CGRect colorFrame = self.view.frame;
-    colorFrame.size.height /= 2;
-    */
-    
-    
     _linearizeBuffer = NULL;
     _coloredDepthBuffer = NULL;
-    _normalsBuffer = NULL;
     
-    /*
-    
-    _depthImageView = [[UIImageView alloc] initWithFrame:depthFrame];
-    _depthImageView.contentMode = UIViewContentModeScaleAspectFit;
-    [self.view addSubview:_depthImageView];
-    
-    _normalsImageView = [[UIImageView alloc] initWithFrame:normalsFrame];
-    _normalsImageView.contentMode = UIViewContentModeScaleAspectFit;
-    [self.view addSubview:_normalsImageView];
-    
-    _colorImageView = [[UIImageView alloc] initWithFrame:colorFrame];
-    _colorImageView.contentMode = UIViewContentModeScaleAspectFit;
-    [self.view addSubview:_colorImageView];
-    */
     [self setupColorCamera];
     
     // Sample usage of wireless debugging API
@@ -141,9 +102,6 @@ struct AppStatus
     
     if (_coloredDepthBuffer)
         free(_coloredDepthBuffer);
-    
-    if (_normalsBuffer)
-        free(_normalsBuffer);
 }
 
 
@@ -386,7 +344,6 @@ struct AppStatus
 - (void)sensorDidOutputDepthFrame:(STDepthFrame *)depthFrame
 {
     [self renderDepthFrame:depthFrame];
-    [self renderNormalsFrame:depthFrame];
 }
 
 // This synchronized API will only be called when two frames match. Typically, timestamps are within 1ms of each other.
@@ -397,7 +354,6 @@ struct AppStatus
                                andColorBuffer:(CMSampleBufferRef)sampleBuffer
 {
     [self renderDepthFrame:depthFrame];
-    [self renderNormalsFrame:depthFrame];
     [self renderColorFrame:sampleBuffer];
 }
 
@@ -485,7 +441,7 @@ const uint16_t maxShiftValue = 2048;
     size_t cols = depthFrame.width;
     size_t rows = depthFrame.height;
     
-    if (_linearizeBuffer == NULL || _normalsBuffer == NULL)
+    if (_linearizeBuffer == NULL )
     {
         [self populateLinearizeBuffer];
         _coloredDepthBuffer = (uint8_t*)malloc(cols * rows * 4);
@@ -520,59 +476,6 @@ const uint16_t maxShiftValue = 2048;
     
     // Assign CGImage to UIImage
     _depthImageView.image = [UIImage imageWithCGImage:imageRef];
-    
-    CGImageRelease(imageRef);
-    CGDataProviderRelease(provider);
-    CGColorSpaceRelease(colorSpace);
-    
-}
-
-- (void) renderNormalsFrame: (STDepthFrame*) depthFrame
-{
-    // Convert depth units from shift to millimeters (stored as floats)
-    [_floatDepthFrame updateFromDepthFrame:depthFrame];
-    
-    // Estimate surface normal direction from depth float values
-    STNormalFrame *normalsFrame = [_normalsEstimator calculateNormalsWithDepthFrame:_floatDepthFrame];
-    
-    size_t cols = normalsFrame.width;
-    size_t rows = normalsFrame.height;
-    
-    // Convert normal unit vectors (ranging from -1 to 1) to RGB (ranging from 0 to 255)
-    // Z can be slightly positive in some cases too!
-    if (_normalsBuffer == NULL)
-    {
-        _normalsBuffer = (uint8_t*)malloc(cols * rows * 4);
-    }
-    for (size_t i = 0; i < cols * rows; i++)
-    {
-        _normalsBuffer[4*i+0] = (uint8_t)( ( ( normalsFrame.normals[i].x / 2 ) + 0.5 ) * 255);
-        _normalsBuffer[4*i+1] = (uint8_t)( ( ( normalsFrame.normals[i].y / 2 ) + 0.5 ) * 255);
-        _normalsBuffer[4*i+2] = (uint8_t)( ( ( normalsFrame.normals[i].z / 2 ) + 0.5 ) * 255);
-    }
-    
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    
-    CGBitmapInfo bitmapInfo;
-    bitmapInfo = (CGBitmapInfo)kCGImageAlphaNoneSkipFirst;
-    bitmapInfo |= kCGBitmapByteOrder32Little;
-    
-    NSData *data = [NSData dataWithBytes:_normalsBuffer length:cols * rows * 4];
-    CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)data);
-    
-    CGImageRef imageRef = CGImageCreate(cols,
-                                        rows,
-                                        8,
-                                        8 * 4,
-                                        cols * 4,
-                                        colorSpace,
-                                        bitmapInfo,
-                                        provider,
-                                        NULL,
-                                        false,
-                                        kCGRenderingIntentDefault);
-    
-    //_normalsImageView.image = [[UIImage alloc] initWithCGImage:imageRef];
     
     CGImageRelease(imageRef);
     CGDataProviderRelease(provider);

@@ -14,7 +14,6 @@
 @interface ViewController : UIViewController <STSensorControllerDelegate>
 
 @property (weak, nonatomic) IBOutlet UIImageView *cameraImageView;
-
 @property (weak, nonatomic) IBOutlet UIImageView *depthImageView;
 
 @end

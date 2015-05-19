@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6647761B1B0B091800FB6B3F /* PointCloudRender.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6647761A1B0B091800FB6B3F /* PointCloudRender.mm */; };
 		66E1936B1B0AD4C500681324 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 66E1936A1B0AD4C500681324 /* main.m */; };
 		66E1936E1B0AD4C500681324 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 66E1936D1B0AD4C500681324 /* AppDelegate.mm */; };
 		66E193711B0AD4C500681324 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 66E193701B0AD4C500681324 /* ViewController.mm */; };
@@ -43,6 +44,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		664776141B0B073400FB6B3F /* AnimationControl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AnimationControl.h; sourceTree = "<group>"; };
+		664776191B0B091800FB6B3F /* PointCloudRender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PointCloudRender.h; path = ../PointCloudRender.h; sourceTree = "<group>"; };
+		6647761A1B0B091800FB6B3F /* PointCloudRender.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = PointCloudRender.mm; path = ../PointCloudRender.mm; sourceTree = "<group>"; };
 		66E193651B0AD4C500681324 /* KirakiraVIEW.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KirakiraVIEW.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		66E193691B0AD4C500681324 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		66E1936A1B0AD4C500681324 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -108,7 +112,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		66E1935C1B0AD4C400681324 = {
+		664776151B0B080D00FB6B3F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				66E193AD1B0AD5CC00681324 /* Structure.framework */,
@@ -127,7 +131,15 @@
 				66E193921B0AD56700681324 /* UIKit.framework */,
 				66E193901B0AD56000681324 /* GLKit.framework */,
 				66E1938E1B0AD55300681324 /* libz.dylib */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		66E1935C1B0AD4C400681324 = {
+			isa = PBXGroup;
+			children = (
 				66E193671B0AD4C500681324 /* KirakiraVIEW */,
+				664776151B0B080D00FB6B3F /* Frameworks */,
 				66E193811B0AD4C500681324 /* KirakiraVIEWTests */,
 				66E193661B0AD4C500681324 /* Products */,
 			);
@@ -145,6 +157,9 @@
 		66E193671B0AD4C500681324 /* KirakiraVIEW */ = {
 			isa = PBXGroup;
 			children = (
+				664776141B0B073400FB6B3F /* AnimationControl.h */,
+				664776191B0B091800FB6B3F /* PointCloudRender.h */,
+				6647761A1B0B091800FB6B3F /* PointCloudRender.mm */,
 				66E1936C1B0AD4C500681324 /* AppDelegate.h */,
 				66E1936D1B0AD4C500681324 /* AppDelegate.mm */,
 				66E1936F1B0AD4C500681324 /* ViewController.h */,
@@ -285,6 +300,7 @@
 			files = (
 				66E193711B0AD4C500681324 /* ViewController.mm in Sources */,
 				66E1936E1B0AD4C500681324 /* AppDelegate.mm in Sources */,
+				6647761B1B0B091800FB6B3F /* PointCloudRender.mm in Sources */,
 				66E1936B1B0AD4C500681324 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -490,6 +506,7 @@
 				66E1938A1B0AD4C500681324 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		66E1938B1B0AD4C500681324 /* Build configuration list for PBXNativeTarget "KirakiraVIEWTests" */ = {
 			isa = XCConfigurationList;
@@ -498,6 +515,7 @@
 				66E1938D1B0AD4C500681324 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

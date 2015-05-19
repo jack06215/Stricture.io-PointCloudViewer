@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>44BE8C2B-37DE-468F-837D-2E74C3978DF1</string>
 	<key>IDESourceControlProjectName</key>
-	<string>project</string>
+	<string>KirakiraVIEW</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>877E230E2EEF22B48AB2B9F39623C88DE17632EA</key>
 		<string>github.com:jack06215/Structure.io-PointCloudViewer.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>KirakiraVIEW/KirakiraVIEW.xcodeproj/project.xcworkspace</string>
+	<string>KirakiraVIEW/KirakiraVIEW.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>877E230E2EEF22B48AB2B9F39623C88DE17632EA</key>
